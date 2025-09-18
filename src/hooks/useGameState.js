@@ -6,6 +6,7 @@ const useGameState = () => {
     currentScore: 0,
     highScore: 0,
     gridSize: 3,
+    previewTime: 3000, // milliseconds
     gameMode: 'numbers', // 'numbers' | 'emojis'
     gameStatus: 'menu', // 'menu' | 'preview' | 'playing' | 'gameover' | 'levelcomplete'
     currentSequence: [],
@@ -13,32 +14,49 @@ const useGameState = () => {
     gridData: []
   });
 
+  // Calculate preview time based on level
+  const calculatePreviewTime = useCallback((level) => {
+    // Level 1: 3 seconds, Level 2: 2 seconds, Level 3+: 1 second (minimum)
+    if (level === 1) return 3000;
+    if (level === 2) return 2000;
+    return 1000; // Level 3 and higher
+  }, []);
+
   // Start a new game
   const startGame = useCallback(() => {
+    const level = 1;
     setGameState(prevState => ({
       ...prevState,
-      currentLevel: 1,
+      currentLevel: level,
       currentScore: 0,
       gridSize: 3,
+      previewTime: calculatePreviewTime(level),
       gameStatus: 'preview',
       currentSequence: [],
       playerSequence: [],
       gridData: []
     }));
-  }, []);
+  }, [calculatePreviewTime]);
 
   // Advance to next level
   const advanceLevel = useCallback(() => {
-    setGameState(prevState => ({
-      ...prevState,
-      currentLevel: prevState.currentLevel + 1,
-      gridSize: prevState.gridSize + 1,
-      gameStatus: 'preview',
-      currentSequence: [],
-      playerSequence: [],
-      gridData: []
-    }));
-  }, []);
+    setGameState(prevState => {
+      const nextLevel = prevState.currentLevel + 1;
+      const nextGridSize = prevState.gridSize + 1;
+      const nextPreviewTime = calculatePreviewTime(nextLevel);
+      
+      return {
+        ...prevState,
+        currentLevel: nextLevel,
+        gridSize: nextGridSize,
+        previewTime: nextPreviewTime,
+        gameStatus: 'preview',
+        currentSequence: [],
+        playerSequence: [],
+        gridData: []
+      };
+    });
+  }, [calculatePreviewTime]);
 
   // Update score
   const updateScore = useCallback((points) => {
@@ -121,17 +139,19 @@ const useGameState = () => {
 
   // Reset game
   const resetGame = useCallback(() => {
+    const level = 1;
     setGameState(prevState => ({
       ...prevState,
-      currentLevel: 1,
+      currentLevel: level,
       currentScore: 0,
       gridSize: 3,
+      previewTime: calculatePreviewTime(level),
       gameStatus: 'menu',
       currentSequence: [],
       playerSequence: [],
       gridData: []
     }));
-  }, []);
+  }, [calculatePreviewTime]);
 
   // Set high score (for loading from localStorage)
   const setHighScore = useCallback((score) => {
@@ -158,7 +178,8 @@ const useGameState = () => {
     resetPlayerSequence,
     toggleGameMode,
     resetGame,
-    setHighScore
+    setHighScore,
+    calculatePreviewTime
   };
 };
 

@@ -55,9 +55,41 @@
   100% { transform: rotateY(0); }
 }
 
+/* Clicked cell styling */
+.gridCell.clicked {
+  background-color: #4CAF50;
+  color: white;
+  cursor: default;
+}
+
+.gridCell.clicked:hover {
+  background-color: #4CAF50;
+  transform: none;
+}
+
+/* Clickable cell styling */
+.gridCell.clickable {
+  border-color: #2196F3;
+  box-shadow: 0 0 10px rgba(33, 150, 243, 0.3);
+}
+
+.gridCell.clickable:hover {
+  background-color: #e3f2fd;
+  border-color: #1976D2;
+  box-shadow: 0 0 15px rgba(33, 150, 243, 0.5);
+}
+
 @media (max-width: 768px) {
   .gridCell {
     font-size: 1.2rem;
     border-width: 1px;
+  }
+  
+  .gridCell.clickable {
+    box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
+  }
+  
+  .gridCell.clickable:hover {
+    box-shadow: 0 0 12px rgba(33, 150, 243, 0.5);
   }
 }

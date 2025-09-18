@@ -1,6 +1,5 @@
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import GridCell from './GridCell';
 
 describe('GridCell', () => {
@@ -10,7 +9,10 @@ describe('GridCell', () => {
     isDisabled: false,
     isIncorrect: false,
     onClick: vi.fn(),
-    isFlipping: false
+    isFlipping: false,
+    isClickable: false,
+    isClicked: false,
+    gameStatus: 'menu'
   };
 
   beforeEach(() => {
@@ -29,10 +31,10 @@ describe('GridCell', () => {
 
   it('calls onClick when clicked and not disabled', () => {
     const mockOnClick = vi.fn();
-    render(<GridCell {...defaultProps} onClick={mockOnClick} />);
+    render(<GridCell {...defaultProps} onClick={mockOnClick} gameStatus="playing" isClickable={true} />);
     
     fireEvent.click(screen.getByRole('button'));
-    expect(mockOnClick).toHaveBeenCalledTimes(1);
+    expect(mockOnClick).toHaveBeenCalledWith(5);
   });
 
   it('does not call onClick when disabled', () => {
@@ -45,18 +47,18 @@ describe('GridCell', () => {
 
   it('handles keyboard events (Enter key)', () => {
     const mockOnClick = vi.fn();
-    render(<GridCell {...defaultProps} onClick={mockOnClick} />);
+    render(<GridCell {...defaultProps} onClick={mockOnClick} gameStatus="playing" isClickable={true} />);
     
     fireEvent.keyDown(screen.getByRole('button'), { key: 'Enter' });
-    expect(mockOnClick).toHaveBeenCalledTimes(1);
+    expect(mockOnClick).toHaveBeenCalledWith(5);
   });
 
   it('handles keyboard events (Space key)', () => {
     const mockOnClick = vi.fn();
-    render(<GridCell {...defaultProps} onClick={mockOnClick} />);
+    render(<GridCell {...defaultProps} onClick={mockOnClick} gameStatus="playing" isClickable={true} />);
     
     fireEvent.keyDown(screen.getByRole('button'), { key: ' ' });
-    expect(mockOnClick).toHaveBeenCalledTimes(1);
+    expect(mockOnClick).toHaveBeenCalledWith(5);
   });
 
   it('does not handle keyboard events when disabled', () => {
@@ -94,11 +96,11 @@ describe('GridCell', () => {
   });
 
   it('has correct accessibility attributes', () => {
-    render(<GridCell {...defaultProps} />);
+    render(<GridCell {...defaultProps} gameStatus="playing" isClickable={true} />);
     const cell = screen.getByRole('button');
     
     expect(cell).toHaveAttribute('tabIndex', '0');
-    expect(cell).toHaveAttribute('aria-label', 'Grid cell hidden');
+    expect(cell).toHaveAttribute('aria-label', 'Grid cell hidden, clickable');
   });
 
   it('has correct accessibility attributes when revealed', () => {
@@ -113,5 +115,125 @@ describe('GridCell', () => {
     const cell = screen.getByRole('button');
     
     expect(cell).toHaveAttribute('tabIndex', '-1');
+  });
+
+  describe('Game Logic Integration', () => {
+    it('prevents clicks during preview phase', () => {
+      const mockOnClick = vi.fn();
+      render(<GridCell {...defaultProps} onClick={mockOnClick} gameStatus="preview" />);
+      
+      fireEvent.click(screen.getByRole('button'));
+      expect(mockOnClick).not.toHaveBeenCalled();
+    });
+
+    it('allows clicks during playing phase when clickable', () => {
+      const mockOnClick = vi.fn();
+      render(<GridCell {...defaultProps} onClick={mockOnClick} gameStatus="playing" isClickable={true} />);
+      
+      fireEvent.click(screen.getByRole('button'));
+      expect(mockOnClick).toHaveBeenCalledWith(5);
+    });
+
+    it('prevents clicks during playing phase when not clickable', () => {
+      const mockOnClick = vi.fn();
+      render(<GridCell {...defaultProps} onClick={mockOnClick} gameStatus="playing" isClickable={false} />);
+      
+      fireEvent.click(screen.getByRole('button'));
+      expect(mockOnClick).not.toHaveBeenCalled();
+    });
+
+    it('prevents clicks when already clicked', () => {
+      const mockOnClick = vi.fn();
+      render(<GridCell {...defaultProps} onClick={mockOnClick} gameStatus="playing" isClickable={true} isClicked={true} />);
+      
+      fireEvent.click(screen.getByRole('button'));
+      expect(mockOnClick).not.toHaveBeenCalled();
+    });
+
+    it('prevents clicks during gameover', () => {
+      const mockOnClick = vi.fn();
+      render(<GridCell {...defaultProps} onClick={mockOnClick} gameStatus="gameover" isClickable={true} />);
+      
+      fireEvent.click(screen.getByRole('button'));
+      expect(mockOnClick).not.toHaveBeenCalled();
+    });
+
+    it('prevents clicks during levelcomplete', () => {
+      const mockOnClick = vi.fn();
+      render(<GridCell {...defaultProps} onClick={mockOnClick} gameStatus="levelcomplete" isClickable={true} />);
+      
+      fireEvent.click(screen.getByRole('button'));
+      expect(mockOnClick).not.toHaveBeenCalled();
+    });
+
+    it('applies clickable class when cell is clickable and game is playing', () => {
+      render(<GridCell {...defaultProps} gameStatus="playing" isClickable={true} />);
+      const cell = screen.getByRole('button');
+      expect(cell.className).toContain('clickable');
+    });
+
+    it('applies clicked class when cell is clicked', () => {
+      render(<GridCell {...defaultProps} isClicked={true} />);
+      const cell = screen.getByRole('button');
+      expect(cell.className).toContain('clicked');
+    });
+
+    it('shows incorrect feedback animation', async () => {
+      vi.useFakeTimers();
+      const { rerender } = render(<GridCell {...defaultProps} />);
+      
+      // Trigger incorrect state
+      rerender(<GridCell {...defaultProps} isIncorrect={true} />);
+      const cell = screen.getByRole('button');
+      expect(cell.className).toContain('incorrect');
+
+      // Fast-forward time to complete the animation
+      vi.advanceTimersByTime(500);
+      
+      // The incorrect class should still be there from the prop, but the internal feedback should be cleared
+      expect(cell.className).toContain('incorrect');
+      
+      // Reset incorrect prop
+      rerender(<GridCell {...defaultProps} isIncorrect={false} />);
+      expect(cell.className).not.toContain('incorrect');
+      
+      vi.useRealTimers();
+    });
+
+    it('has correct accessibility attributes for clickable cells', () => {
+      render(<GridCell {...defaultProps} gameStatus="playing" isClickable={true} />);
+      const cell = screen.getByRole('button');
+      
+      expect(cell).toHaveAttribute('aria-label', 'Grid cell hidden, clickable');
+    });
+
+    it('has correct accessibility attributes for clicked cells', () => {
+      render(<GridCell {...defaultProps} isClicked={true} isRevealed={true} />);
+      const cell = screen.getByRole('button');
+      
+      expect(cell).toHaveAttribute('aria-label', 'Grid cell with value 5, already clicked');
+    });
+
+    it('has data-testid attribute for testing', () => {
+      render(<GridCell {...defaultProps} />);
+      const cell = screen.getByTestId('grid-cell-5');
+      expect(cell).toBeInTheDocument();
+    });
+
+    it('handles keyboard events during playing phase', () => {
+      const mockOnClick = vi.fn();
+      render(<GridCell {...defaultProps} onClick={mockOnClick} gameStatus="playing" isClickable={true} />);
+      
+      fireEvent.keyDown(screen.getByRole('button'), { key: 'Enter' });
+      expect(mockOnClick).toHaveBeenCalledWith(5);
+    });
+
+    it('prevents keyboard events during preview phase', () => {
+      const mockOnClick = vi.fn();
+      render(<GridCell {...defaultProps} onClick={mockOnClick} gameStatus="preview" />);
+      
+      fireEvent.keyDown(screen.getByRole('button'), { key: 'Enter' });
+      expect(mockOnClick).not.toHaveBeenCalled();
+    });
   });
 });

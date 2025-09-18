@@ -20,6 +20,7 @@ describe('useGameState', () => {
         currentScore: 0,
         highScore: 0,
         gridSize: 3,
+        previewTime: 3000,
         gameMode: 'numbers',
         gameStatus: 'menu',
         currentSequence: [],
@@ -47,12 +48,28 @@ describe('useGameState', () => {
           currentLevel: 1,
           currentScore: 0,
           gridSize: 3,
+          previewTime: 3000,
           gameStatus: 'preview',
           currentSequence: [],
           playerSequence: [],
           gridData: []
         })
       );
+    });
+  });
+
+  describe('calculatePreviewTime', () => {
+    it('should return correct preview times for different levels', () => {
+      // Level 1: 3 seconds
+      expect(result.current.calculatePreviewTime(1)).toBe(3000);
+      
+      // Level 2: 2 seconds
+      expect(result.current.calculatePreviewTime(2)).toBe(2000);
+      
+      // Level 3 and higher: 1 second (minimum)
+      expect(result.current.calculatePreviewTime(3)).toBe(1000);
+      expect(result.current.calculatePreviewTime(5)).toBe(1000);
+      expect(result.current.calculatePreviewTime(10)).toBe(1000);
     });
   });
 
@@ -65,6 +82,32 @@ describe('useGameState', () => {
       expect(result.current.gameState.currentLevel).toBe(2);
       expect(result.current.gameState.gridSize).toBe(4);
       expect(result.current.gameState.gameStatus).toBe('preview');
+    });
+
+    it('should update preview time based on level progression', () => {
+      // Level 1 -> 2: 3000ms -> 2000ms
+      act(() => {
+        result.current.advanceLevel();
+      });
+
+      expect(result.current.gameState.currentLevel).toBe(2);
+      expect(result.current.gameState.previewTime).toBe(2000);
+
+      // Level 2 -> 3: 2000ms -> 1000ms
+      act(() => {
+        result.current.advanceLevel();
+      });
+
+      expect(result.current.gameState.currentLevel).toBe(3);
+      expect(result.current.gameState.previewTime).toBe(1000);
+
+      // Level 3 -> 4: should stay at 1000ms (minimum)
+      act(() => {
+        result.current.advanceLevel();
+      });
+
+      expect(result.current.gameState.currentLevel).toBe(4);
+      expect(result.current.gameState.previewTime).toBe(1000);
     });
 
     it('should reset sequences and grid data', () => {
@@ -270,6 +313,7 @@ describe('useGameState', () => {
         currentScore: 0,
         highScore: highScore, // Should preserve high score
         gridSize: 3,
+        previewTime: 3000,
         gameMode: 'numbers',
         gameStatus: 'menu',
         currentSequence: [],
@@ -313,6 +357,89 @@ describe('useGameState', () => {
 
       expect(console.warn).toHaveBeenCalledWith('High score must be a non-negative number');
       expect(result.current.gameState.highScore).toBe(initialHighScore);
+    });
+  });
+
+  describe('Level Progression Requirements', () => {
+    it('should meet requirement 3.1: 3×3 grid advances to 4×4', () => {
+      // Start with 3×3 grid (level 1)
+      expect(result.current.gameState.currentLevel).toBe(1);
+      expect(result.current.gameState.gridSize).toBe(3);
+
+      // Complete level and advance
+      act(() => {
+        result.current.advanceLevel();
+      });
+
+      // Should now be 4×4 grid (level 2)
+      expect(result.current.gameState.currentLevel).toBe(2);
+      expect(result.current.gameState.gridSize).toBe(4);
+    });
+
+    it('should meet requirement 3.2: grid size increases by 1 each level', () => {
+      const levels = [1, 2, 3, 4, 5];
+      const expectedGridSizes = [3, 4, 5, 6, 7];
+
+      levels.forEach((level, index) => {
+        if (index > 0) {
+          act(() => {
+            result.current.advanceLevel();
+          });
+        }
+        expect(result.current.gameState.currentLevel).toBe(level);
+        expect(result.current.gameState.gridSize).toBe(expectedGridSizes[index]);
+      });
+    });
+
+    it('should meet requirement 3.3: preview time reduces by 1 second (minimum 1s)', () => {
+      // Level 1: 3 seconds
+      expect(result.current.gameState.previewTime).toBe(3000);
+
+      // Level 2: 2 seconds
+      act(() => {
+        result.current.advanceLevel();
+      });
+      expect(result.current.gameState.previewTime).toBe(2000);
+
+      // Level 3: 1 second (minimum)
+      act(() => {
+        result.current.advanceLevel();
+      });
+      expect(result.current.gameState.previewTime).toBe(1000);
+
+      // Level 4: still 1 second (minimum maintained)
+      act(() => {
+        result.current.advanceLevel();
+      });
+      expect(result.current.gameState.previewTime).toBe(1000);
+    });
+
+    it('should meet requirement 3.4: level 2 shows numbers for 2 seconds', () => {
+      act(() => {
+        result.current.advanceLevel();
+      });
+      
+      expect(result.current.gameState.currentLevel).toBe(2);
+      expect(result.current.gameState.previewTime).toBe(2000);
+    });
+
+    it('should meet requirement 3.5: level 3+ shows numbers for 1 second', () => {
+      // Advance to level 3
+      act(() => {
+        result.current.advanceLevel(); // Level 2
+        result.current.advanceLevel(); // Level 3
+      });
+      
+      expect(result.current.gameState.currentLevel).toBe(3);
+      expect(result.current.gameState.previewTime).toBe(1000);
+
+      // Test higher levels maintain 1 second
+      act(() => {
+        result.current.advanceLevel(); // Level 4
+      });
+      
+      expect(result.current.gameState.currentLevel).toBe(4);
+      expect(result.current.gameState.previewTime).toBe(1000);
     });
   });
 

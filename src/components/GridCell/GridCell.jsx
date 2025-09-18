@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import styles from './GridCell.module.css';
 
 const GridCell = ({ 
@@ -7,20 +7,58 @@ const GridCell = ({
   isDisabled, 
   isIncorrect,
   onClick,
-  isFlipping 
+  isFlipping,
+  isClickable = false,
+  isClicked = false,
+  gameStatus = 'menu'
 }) => {
+  const [showIncorrectFeedback, setShowIncorrectFeedback] = useState(false);
+
+  // Handle click with game logic integration
   const handleClick = () => {
-    if (!isDisabled && onClick) {
-      onClick();
+    // Prevent clicks during preview phase
+    if (gameStatus === 'preview') {
+      return;
+    }
+
+    // Prevent clicks if disabled or already clicked
+    if (isDisabled || isClicked) {
+      return;
+    }
+
+    // Only allow clicks during playing phase and if cell is clickable
+    if (gameStatus === 'playing' && isClickable && onClick) {
+      onClick(value);
     }
   };
+
+  // Show incorrect feedback animation
+  useEffect(() => {
+    if (isIncorrect) {
+      setShowIncorrectFeedback(true);
+      const timer = setTimeout(() => {
+        setShowIncorrectFeedback(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isIncorrect]);
+
+  // Determine if cell should be disabled
+  const shouldBeDisabled = isDisabled || 
+                          gameStatus === 'preview' || 
+                          gameStatus === 'menu' ||
+                          gameStatus === 'gameover' ||
+                          gameStatus === 'levelcomplete' ||
+                          (gameStatus === 'playing' && !isClickable && !isClicked);
 
   const cellClasses = [
     styles.gridCell,
     isRevealed && styles.revealed,
-    isDisabled && styles.disabled,
-    isIncorrect && styles.incorrect,
-    isFlipping && styles.flipping
+    shouldBeDisabled && styles.disabled,
+    (isIncorrect || showIncorrectFeedback) && styles.incorrect,
+    isFlipping && styles.flipping,
+    isClicked && styles.clicked,
+    isClickable && gameStatus === 'playing' && !isClicked && styles.clickable
   ].filter(Boolean).join(' ');
 
   return (
@@ -28,14 +66,15 @@ const GridCell = ({
       className={cellClasses}
       onClick={handleClick}
       role="button"
-      tabIndex={isDisabled ? -1 : 0}
+      tabIndex={shouldBeDisabled ? -1 : 0}
       onKeyDown={(e) => {
-        if ((e.key === 'Enter' || e.key === ' ') && !isDisabled) {
+        if ((e.key === 'Enter' || e.key === ' ') && !shouldBeDisabled) {
           e.preventDefault();
           handleClick();
         }
       }}
-      aria-label={`Grid cell ${isRevealed ? `with value ${value}` : 'hidden'}`}
+      aria-label={`Grid cell ${isRevealed ? `with value ${value}` : 'hidden'}${isClickable ? ', clickable' : ''}${isClicked ? ', already clicked' : ''}`}
+      data-testid={`grid-cell-${value}`}
     >
       {isRevealed ? value : '?'}
     </div>

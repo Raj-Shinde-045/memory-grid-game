@@ -1,0 +1,67 @@
+.levelDisplay {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.levelInfo {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  color: white;
+  font-weight: 600;
+}
+
+.levelNumber {
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.gridInfo {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.previewInfo {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .levelInfo {
+    gap: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .levelNumber {
+    font-size: 1.1rem;
+  }
+  
+  .gridInfo,
+  .previewInfo {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .levelInfo {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  
+  .levelNumber {
+    font-size: 1rem;
+  }
+  
+  .gridInfo,
+  .previewInfo {
+    font-size: 0.8rem;
+  }
+}
