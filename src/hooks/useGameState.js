@@ -146,6 +146,7 @@ const useGameState = () => {
       currentScore: 0,
       gridSize: 3,
       previewTime: calculatePreviewTime(level),
+      gameMode: 'numbers', // Reset to default game mode
       gameStatus: 'menu',
       currentSequence: [],
       playerSequence: [],
