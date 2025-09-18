@@ -3,11 +3,12 @@ import GameGrid from './components/GameGrid/GameGrid';
 import ScoreDisplay from './components/ScoreDisplay/ScoreDisplay';
 import ConfettiAnimation from './components/ConfettiAnimation/ConfettiAnimation';
 import RestartButton from './components/RestartButton/RestartButton';
+import ModeToggle from './components/ModeToggle/ModeToggle';
 import useGameState from './hooks/useGameState';
 import './App.css';
 
 function App() {
-  const { gameState, resetGame, startGame } = useGameState();
+  const { gameState, resetGame, startGame, toggleGameMode } = useGameState();
   const [showConfetti, setShowConfetti] = useState(false);
 
   // Trigger confetti animation when level is completed
@@ -37,10 +38,15 @@ function App() {
       <header className="app-header">
         <h1>Memory Grid Game</h1>
         <ScoreDisplay />
+        <ModeToggle 
+          gameMode={gameState.gameMode} 
+          onToggle={toggleGameMode}
+          disabled={gameState.gameStatus === 'playing' || gameState.gameStatus === 'preview'}
+        />
       </header>
       
       <main className="app-main">
-        <GameGrid />
+        <GameGrid gameMode={gameState.gameMode} />
         
         <div className="game-controls">
           {gameState.gameStatus === 'menu' && (

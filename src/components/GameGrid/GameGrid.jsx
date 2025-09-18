@@ -12,7 +12,8 @@ const GameGrid = ({
   flippingCells = [],
   gameStatus = 'playing',
   clickableCells = [],
-  clickedCells = []
+  clickedCells = [],
+  gameMode = 'numbers'
 }) => {
   const handleCellClick = (index) => {
     if (onCellClick) {
@@ -38,6 +39,7 @@ const GameGrid = ({
           isClickable={clickableCells.includes(index)}
           isClicked={clickedCells.includes(index)}
           gameStatus={gameStatus}
+          gameMode={gameMode}
           onClick={() => handleCellClick(index)}
         />
       ))}

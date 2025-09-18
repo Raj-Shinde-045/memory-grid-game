@@ -288,6 +288,82 @@ describe('useGameState', () => {
 
       expect(result.current.gameState.gameMode).toBe('numbers');
     });
+
+    it('should meet requirement 7.1: provide toggle for Number Mode or Emoji Mode', () => {
+      // Initial state should be numbers mode
+      expect(result.current.gameState.gameMode).toBe('numbers');
+
+      // Should be able to toggle to emoji mode
+      act(() => {
+        result.current.toggleGameMode();
+      });
+
+      expect(result.current.gameState.gameMode).toBe('emojis');
+    });
+
+    it('should meet requirement 7.3: maintain same game logic and difficulty progression', () => {
+      // Set up game state
+      act(() => {
+        result.current.startGame();
+        result.current.updateScore(100);
+        result.current.advanceLevel();
+      });
+
+      const beforeToggle = {
+        currentLevel: result.current.gameState.currentLevel,
+        currentScore: result.current.gameState.currentScore,
+        gridSize: result.current.gameState.gridSize,
+        previewTime: result.current.gameState.previewTime
+      };
+
+      // Toggle game mode
+      act(() => {
+        result.current.toggleGameMode();
+      });
+
+      // Game logic should remain unchanged
+      expect(result.current.gameState.currentLevel).toBe(beforeToggle.currentLevel);
+      expect(result.current.gameState.currentScore).toBe(beforeToggle.currentScore);
+      expect(result.current.gameState.gridSize).toBe(beforeToggle.gridSize);
+      expect(result.current.gameState.previewTime).toBe(beforeToggle.previewTime);
+      
+      // Only game mode should change
+      expect(result.current.gameState.gameMode).toBe('emojis');
+    });
+
+    it('should preserve game mode during level advancement', () => {
+      // Switch to emoji mode
+      act(() => {
+        result.current.toggleGameMode();
+      });
+
+      expect(result.current.gameState.gameMode).toBe('emojis');
+
+      // Advance level
+      act(() => {
+        result.current.advanceLevel();
+      });
+
+      // Game mode should be preserved
+      expect(result.current.gameState.gameMode).toBe('emojis');
+    });
+
+    it('should preserve game mode during score updates', () => {
+      // Switch to emoji mode
+      act(() => {
+        result.current.toggleGameMode();
+      });
+
+      expect(result.current.gameState.gameMode).toBe('emojis');
+
+      // Update score
+      act(() => {
+        result.current.updateScore(50);
+      });
+
+      // Game mode should be preserved
+      expect(result.current.gameState.gameMode).toBe('emojis');
+    });
   });
 
   describe('resetGame', () => {

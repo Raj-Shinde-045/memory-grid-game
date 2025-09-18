@@ -236,4 +236,63 @@ describe('GridCell', () => {
       expect(mockOnClick).not.toHaveBeenCalled();
     });
   });
+
+  describe('Emoji Mode', () => {
+    it('displays number when gameMode is numbers', () => {
+      render(<GridCell {...defaultProps} isRevealed={true} gameMode="numbers" />);
+      expect(screen.getByText('5')).toBeInTheDocument();
+    });
+
+    it('displays emoji when gameMode is emojis', () => {
+      render(<GridCell {...defaultProps} isRevealed={true} gameMode="emojis" />);
+      // The 5th emoji in our dataset should be displayed
+      expect(screen.getByText('🐰')).toBeInTheDocument();
+    });
+
+    it('displays question mark when not revealed regardless of game mode', () => {
+      const { rerender } = render(<GridCell {...defaultProps} isRevealed={false} gameMode="numbers" />);
+      expect(screen.getByText('?')).toBeInTheDocument();
+
+      rerender(<GridCell {...defaultProps} isRevealed={false} gameMode="emojis" />);
+      expect(screen.getByText('?')).toBeInTheDocument();
+    });
+
+    it('has correct aria-label for emoji mode', () => {
+      render(<GridCell {...defaultProps} isRevealed={true} gameMode="emojis" />);
+      const cell = screen.getByRole('button');
+      
+      expect(cell).toHaveAttribute('aria-label', 'Grid cell with value emoji 🐰');
+    });
+
+    it('has correct aria-label for numbers mode', () => {
+      render(<GridCell {...defaultProps} isRevealed={true} gameMode="numbers" />);
+      const cell = screen.getByRole('button');
+      
+      expect(cell).toHaveAttribute('aria-label', 'Grid cell with value 5');
+    });
+
+    it('calls onClick with numeric value even in emoji mode', () => {
+      const mockOnClick = vi.fn();
+      render(<GridCell {...defaultProps} onClick={mockOnClick} gameStatus="playing" isClickable={true} gameMode="emojis" />);
+      
+      fireEvent.click(screen.getByRole('button'));
+      expect(mockOnClick).toHaveBeenCalledWith(5);
+    });
+
+    it('handles different emoji values correctly', () => {
+      const { rerender } = render(<GridCell {...defaultProps} value={1} isRevealed={true} gameMode="emojis" />);
+      expect(screen.getByText('🐶')).toBeInTheDocument();
+
+      rerender(<GridCell {...defaultProps} value={2} isRevealed={true} gameMode="emojis" />);
+      expect(screen.getByText('🐱')).toBeInTheDocument();
+
+      rerender(<GridCell {...defaultProps} value={3} isRevealed={true} gameMode="emojis" />);
+      expect(screen.getByText('🐭')).toBeInTheDocument();
+    });
+
+    it('defaults to numbers mode when gameMode prop is not provided', () => {
+      render(<GridCell {...defaultProps} isRevealed={true} />);
+      expect(screen.getByText('5')).toBeInTheDocument();
+    });
+  });
 });

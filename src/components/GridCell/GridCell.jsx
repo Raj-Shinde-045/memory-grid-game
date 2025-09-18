@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from './GridCell.module.css';
+import { getEmojiByIndex } from '../../utils/emojiUtils';
 
 const GridCell = ({ 
   value, 
@@ -10,7 +11,8 @@ const GridCell = ({
   isFlipping,
   isClickable = false,
   isClicked = false,
-  gameStatus = 'menu'
+  gameStatus = 'menu',
+  gameMode = 'numbers'
 }) => {
   const [showIncorrectFeedback, setShowIncorrectFeedback] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
@@ -85,6 +87,19 @@ const GridCell = ({
     showFadeIn && styles.fadeIn
   ].filter(Boolean).join(' ');
 
+  // Get display value based on game mode
+  const getDisplayValue = () => {
+    if (!isRevealed) return '?';
+    
+    if (gameMode === 'emojis') {
+      return getEmojiByIndex(value);
+    }
+    
+    return value;
+  };
+
+  const displayValue = getDisplayValue();
+
   return (
     <div 
       className={cellClasses}
@@ -97,10 +112,10 @@ const GridCell = ({
           handleClick();
         }
       }}
-      aria-label={`Grid cell ${isRevealed ? `with value ${value}` : 'hidden'}${isClickable ? ', clickable' : ''}${isClicked ? ', already clicked' : ''}`}
+      aria-label={`Grid cell ${isRevealed ? `with value ${gameMode === 'emojis' ? `emoji ${displayValue}` : value}` : 'hidden'}${isClickable ? ', clickable' : ''}${isClicked ? ', already clicked' : ''}`}
       data-testid={`grid-cell-${value}`}
     >
-      {isRevealed ? value : '?'}
+      {displayValue}
     </div>
   );
 };

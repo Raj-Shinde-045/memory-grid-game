@@ -133,4 +133,78 @@ describe('GameGrid', () => {
     const cells = screen.queryAllByRole('button');
     expect(cells).toHaveLength(0); // Empty gridData by default
   });
+
+  describe('Game Mode Support', () => {
+    it('passes gameMode prop to GridCell components', () => {
+      render(
+        <GameGrid 
+          {...defaultProps} 
+          gameMode="emojis"
+          revealedCells={[0]}
+        />
+      );
+      
+      // The first cell should show an emoji (🐶 for value 1)
+      const cells = screen.getAllByRole('button');
+      expect(cells[0]).toHaveTextContent('🐶');
+    });
+
+    it('defaults to numbers mode when gameMode prop is not provided', () => {
+      render(
+        <GameGrid 
+          {...defaultProps} 
+          revealedCells={[0]}
+        />
+      );
+      
+      // The first cell should show the number
+      const cells = screen.getAllByRole('button');
+      expect(cells[0]).toHaveTextContent('1');
+    });
+
+    it('switches between number and emoji modes correctly', () => {
+      const { rerender } = render(
+        <GameGrid 
+          {...defaultProps} 
+          gameMode="numbers"
+          revealedCells={[0, 1]}
+        />
+      );
+      
+      let cells = screen.getAllByRole('button');
+      expect(cells[0]).toHaveTextContent('1');
+      expect(cells[1]).toHaveTextContent('2');
+
+      rerender(
+        <GameGrid 
+          {...defaultProps} 
+          gameMode="emojis"
+          revealedCells={[0, 1]}
+        />
+      );
+      
+      cells = screen.getAllByRole('button');
+      expect(cells[0]).toHaveTextContent('🐶');
+      expect(cells[1]).toHaveTextContent('🐱');
+    });
+
+    it('maintains game logic regardless of display mode', () => {
+      const mockOnCellClick = vi.fn();
+      render(
+        <GameGrid 
+          {...defaultProps} 
+          onCellClick={mockOnCellClick}
+          gameMode="emojis"
+          gameStatus="playing"
+          clickableCells={[0]}
+        />
+      );
+      
+      const cells = screen.getAllByRole('button');
+      fireEvent.click(cells[0]);
+      
+      // Should still call with the numeric index, not the emoji
+      expect(mockOnCellClick).toHaveBeenCalledWith(0);
+    });
+  });
 });
