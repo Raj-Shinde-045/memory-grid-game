@@ -13,6 +13,8 @@ const GridCell = ({
   gameStatus = 'menu'
 }) => {
   const [showIncorrectFeedback, setShowIncorrectFeedback] = useState(false);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [showFadeIn, setShowFadeIn] = useState(true);
 
   // Handle click with game logic integration
   const handleClick = () => {
@@ -28,6 +30,8 @@ const GridCell = ({
 
     // Only allow clicks during playing phase and if cell is clickable
     if (gameStatus === 'playing' && isClickable && onClick) {
+      // Trigger success animation for correct clicks
+      setShowSuccessAnimation(true);
       onClick(value);
     }
   };
@@ -38,10 +42,28 @@ const GridCell = ({
       setShowIncorrectFeedback(true);
       const timer = setTimeout(() => {
         setShowIncorrectFeedback(false);
-      }, 500);
+      }, 600);
       return () => clearTimeout(timer);
     }
   }, [isIncorrect]);
+
+  // Handle success animation
+  useEffect(() => {
+    if (showSuccessAnimation) {
+      const timer = setTimeout(() => {
+        setShowSuccessAnimation(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessAnimation]);
+
+  // Handle fade in animation on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowFadeIn(false);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Determine if cell should be disabled
   const shouldBeDisabled = isDisabled || 
@@ -58,7 +80,9 @@ const GridCell = ({
     (isIncorrect || showIncorrectFeedback) && styles.incorrect,
     isFlipping && styles.flipping,
     isClicked && styles.clicked,
-    isClickable && gameStatus === 'playing' && !isClicked && styles.clickable
+    isClickable && gameStatus === 'playing' && !isClicked && styles.clickable,
+    showSuccessAnimation && styles.success,
+    showFadeIn && styles.fadeIn
   ].filter(Boolean).join(' ');
 
   return (

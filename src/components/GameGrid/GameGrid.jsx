@@ -9,7 +9,10 @@ const GameGrid = ({
   revealedCells = [],
   disabledCells = [],
   incorrectCells = [],
-  flippingCells = []
+  flippingCells = [],
+  gameStatus = 'playing',
+  clickableCells = [],
+  clickedCells = []
 }) => {
   const handleCellClick = (index) => {
     if (onCellClick) {
@@ -32,6 +35,9 @@ const GameGrid = ({
           isDisabled={disabledCells.includes(index)}
           isIncorrect={incorrectCells.includes(index)}
           isFlipping={flippingCells.includes(index)}
+          isClickable={clickableCells.includes(index)}
+          isClicked={clickedCells.includes(index)}
+          gameStatus={gameStatus}
           onClick={() => handleCellClick(index)}
         />
       ))}

@@ -321,6 +321,87 @@ describe('useGameState', () => {
         gridData: []
       });
     });
+
+    it('should meet requirement 6.2: reset to level 1 with 3×3 grid', () => {
+      // Advance to higher level
+      act(() => {
+        result.current.advanceLevel();
+        result.current.advanceLevel();
+      });
+
+      expect(result.current.gameState.currentLevel).toBe(3);
+      expect(result.current.gameState.gridSize).toBe(5);
+
+      act(() => {
+        result.current.resetGame();
+      });
+
+      expect(result.current.gameState.currentLevel).toBe(1);
+      expect(result.current.gameState.gridSize).toBe(3);
+    });
+
+    it('should meet requirement 6.4: reset current score to 0 but preserve high score', () => {
+      // Set up high score
+      act(() => {
+        result.current.updateScore(500);
+      });
+
+      expect(result.current.gameState.currentScore).toBe(500);
+      expect(result.current.gameState.highScore).toBe(500);
+
+      // Add more score
+      act(() => {
+        result.current.updateScore(200);
+      });
+
+      expect(result.current.gameState.currentScore).toBe(700);
+      expect(result.current.gameState.highScore).toBe(700);
+
+      // Reset game
+      act(() => {
+        result.current.resetGame();
+      });
+
+      expect(result.current.gameState.currentScore).toBe(0);
+      expect(result.current.gameState.highScore).toBe(700); // Preserved
+    });
+
+    it('should reset game mode to numbers', () => {
+      // Switch to emoji mode
+      act(() => {
+        result.current.toggleGameMode();
+      });
+
+      expect(result.current.gameState.gameMode).toBe('emojis');
+
+      act(() => {
+        result.current.resetGame();
+      });
+
+      expect(result.current.gameState.gameMode).toBe('numbers');
+    });
+
+    it('should clear all sequences and grid data', () => {
+      // Set up sequences and grid data
+      act(() => {
+        result.current.setCurrentSequence([5, 3, 1, 4, 2]);
+        result.current.addToPlayerSequence(5);
+        result.current.addToPlayerSequence(3);
+        result.current.setGridData([5, 3, 1, 4, 2]);
+      });
+
+      expect(result.current.gameState.currentSequence).toHaveLength(5);
+      expect(result.current.gameState.playerSequence).toHaveLength(2);
+      expect(result.current.gameState.gridData).toHaveLength(5);
+
+      act(() => {
+        result.current.resetGame();
+      });
+
+      expect(result.current.gameState.currentSequence).toEqual([]);
+      expect(result.current.gameState.playerSequence).toEqual([]);
+      expect(result.current.gameState.gridData).toEqual([]);
+    });
   });
 
   describe('setHighScore', () => {

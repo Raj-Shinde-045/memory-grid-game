@@ -75,7 +75,14 @@ describe('GameGrid', () => {
 
   it('calls onCellClick with correct index when cell is clicked', () => {
     const mockOnCellClick = vi.fn();
-    render(<GameGrid {...defaultProps} onCellClick={mockOnCellClick} />);
+    render(
+      <GameGrid 
+        {...defaultProps} 
+        onCellClick={mockOnCellClick}
+        gameStatus="playing"
+        clickableCells={[0, 1, 2, 3, 4]}
+      />
+    );
     
     const cells = screen.getAllByRole('button');
     fireEvent.click(cells[0]);

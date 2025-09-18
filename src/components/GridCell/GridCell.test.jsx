@@ -188,7 +188,7 @@ describe('GridCell', () => {
       expect(cell.className).toContain('incorrect');
 
       // Fast-forward time to complete the animation
-      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(600);
       
       // The incorrect class should still be there from the prop, but the internal feedback should be cleared
       expect(cell.className).toContain('incorrect');
