@@ -1,0 +1,111 @@
+.timerDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+  transition: all 0.3s ease;
+}
+
+.timerContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.timeText {
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  transition: color 0.3s ease;
+}
+
+.progressContainer {
+  width: 100%;
+  height: 6px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: #4CAF50;
+  border-radius: 3px;
+  transition: width 0.1s linear, background-color 0.3s ease;
+}
+
+/* Timer states */
+.timerDisplay.idle {
+  opacity: 0.6;
+}
+
+.timerDisplay.idle .timeText {
+  color: #666;
+}
+
+.timerDisplay.idle .progressBar {
+  background: #ccc;
+}
+
+.timerDisplay.normal .timeText {
+  color: #2196F3;
+}
+
+.timerDisplay.normal .progressBar {
+  background: #2196F3;
+}
+
+.timerDisplay.warning {
+  animation: pulse 0.5s ease-in-out infinite alternate;
+}
+
+.timerDisplay.warning .timeText {
+  color: #FF9800;
+}
+
+.timerDisplay.warning .progressBar {
+  background: #FF9800;
+}
+
+.timerDisplay.critical {
+  animation: pulse 0.3s ease-in-out infinite alternate;
+}
+
+.timerDisplay.critical .timeText {
+  color: #F44336;
+}
+
+.timerDisplay.critical .progressBar {
+  background: #F44336;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .timerDisplay {
+    padding: 8px 12px;
+    min-width: 100px;
+  }
+  
+  .timeText {
+    font-size: 1.25rem;
+  }
+  
+  .progressContainer {
+    height: 4px;
+  }
+}

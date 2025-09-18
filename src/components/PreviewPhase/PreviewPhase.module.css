@@ -1,0 +1,283 @@
+.previewPhase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: titlePulse 2s ease-in-out infinite alternate;
+}
+
+.timer {
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+}
+
+.gameGrid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-size), 1fr);
+  gap: 12px;
+  max-width: min(80vw, 80vh);
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.gridCell {
+  position: relative;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  cursor: default;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.cellContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: clamp(1.2rem, 4vw, 2.5rem);
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.cellValue {
+  color: #2196F3;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transform: scale(1);
+  transition: transform 0.3s ease;
+}
+
+.cellPlaceholder {
+  color: #999;
+  font-size: 1.5em;
+  opacity: 0.7;
+}
+
+/* Animation states */
+.gridCell.entering {
+  opacity: 0;
+  transform: scale(0.8) rotateY(-90deg);
+  animation: cellEnter 0.6s ease-out forwards;
+  animation-delay: var(--animation-delay);
+}
+
+.gridCell.showing.revealed {
+  opacity: 1;
+  transform: scale(1) rotateY(0deg);
+}
+
+.gridCell.showing.revealed .cellValue {
+  animation: numberReveal 0.5s ease-out;
+}
+
+.gridCell.exiting.revealed {
+  animation: cellExit 0.3s ease-in forwards;
+  animation-delay: calc(var(--animation-delay) * 0.5);
+}
+
+.gridCell.exiting.hidden {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.gridCell.exiting.hidden .cellPlaceholder {
+  animation: placeholderAppear 0.3s ease-out;
+}
+
+.instructions {
+  text-align: center;
+  max-width: 600px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+}
+
+.instructions p {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Keyframe animations */
+@keyframes titlePulse {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+}
+
+@keyframes cellEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) rotateY(-90deg);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1) rotateY(-45deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateY(0deg);
+  }
+}
+
+@keyframes numberReveal {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes cellExit {
+  0% {
+    opacity: 1;
+    transform: scale(1) rotateY(0deg);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(0.9) rotateY(90deg);
+  }
+}
+
+@keyframes placeholderAppear {
+  0% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+}
+
+/* Hover effects during showing phase */
+.gridCell.showing:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.gridCell.showing:hover .cellValue {
+  transform: scale(1.1);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .previewPhase {
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .title {
+    font-size: 1.5rem;
+  }
+  
+  .gameGrid {
+    gap: 8px;
+    padding: 16px;
+    max-width: 90vw;
+  }
+  
+  .cellContent {
+    font-size: clamp(1rem, 5vw, 2rem);
+  }
+  
+  .instructions p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .gameGrid {
+    gap: 6px;
+    padding: 12px;
+  }
+  
+  .cellContent {
+    font-size: clamp(0.9rem, 6vw, 1.8rem);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .gridCell {
+    background: white;
+    border: 2px solid #333;
+  }
+  
+  .cellValue {
+    color: #000;
+  }
+  
+  .cellPlaceholder {
+    color: #666;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .gridCell.entering {
+    animation: none;
+    opacity: 1;
+    transform: scale(1) rotateY(0deg);
+  }
+  
+  .gridCell.showing.revealed .cellValue {
+    animation: none;
+  }
+  
+  .gridCell.exiting.revealed {
+    animation: none;
+  }
+  
+  .title {
+    animation: none;
+  }
+  
+  .cellContent,
+  .gridCell {
+    transition: none;
+  }
+}
