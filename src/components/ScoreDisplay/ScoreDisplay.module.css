@@ -28,6 +28,25 @@
 
 .currentScore .scoreValue {
   color: #4CAF50;
+  position: relative;
+}
+
+.newHighScoreIndicator {
+  margin-left: 0.5rem;
+  animation: bounce 1s infinite;
+  display: inline-block;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
 }
 
 .highScore .scoreValue {
