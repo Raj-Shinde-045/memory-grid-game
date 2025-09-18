@@ -1,0 +1,25 @@
+.gameGrid {
+  display: grid;
+  gap: 8px;
+  max-width: min(80vw, 80vh);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  padding: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  background-color: #f9f9f9;
+}
+
+/* Dynamic grid sizing will be handled via CSS custom properties */
+.gameGrid {
+  grid-template-columns: repeat(var(--grid-size, 3), 1fr);
+  grid-template-rows: repeat(var(--grid-size, 3), 1fr);
+}
+
+@media (max-width: 768px) {
+  .gameGrid {
+    max-width: 90vw;
+    gap: 4px;
+    padding: 0.5rem;
+  }
+}
